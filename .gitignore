@@ -2,5 +2,6 @@
 .vscode/
 __pycache__/
 dataset/
+runs/
 
-!dataset/tips.txt
+!/dataset/tips.txt
