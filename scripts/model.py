@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-__all__ = ['ResNet50', 'ResNet101','ResNet152']
+__all__ = ['ResNet50', ]
 
 
 def Conv1(in_planes, places, stride=2):
@@ -80,7 +80,6 @@ class ResNet(nn.Module):
             layers.append(Bottleneck(places*self.expansion, places))
 
         return nn.Sequential(*layers)
-
 
     def forward(self, x):
         x = self.conv1(x)

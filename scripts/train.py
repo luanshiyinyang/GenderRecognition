@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -5,14 +7,19 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from runx.logx import logx
 
+
 from model import ResNet50
 from data_loader import TrainDataset
 from optimizer import RAdam
 from utils import get_logdir
 
+parser = ArgumentParser()
+parser.add_argument("--pretrained", type=str, default=None)
+opt = parser.parse_args()
+
 # 超参数设置
 EPOCH = 50
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 LR = 0.001
 
 logx.initialize(get_logdir("../runs/"), coolname=True, tensorboard=True)
@@ -22,10 +29,11 @@ desc_train = '../dataset/new_train.csv'
 desc_valid = '../dataset/new_valid.csv'
 
 transform_train = transforms.Compose([
-    transforms.RandomCrop((200, 200), padding=2),
-    transforms.RandomAffine(0, translate=(0.05, 0.05)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomRotation(5),
+    # transforms.RandomCrop((200, 200), padding=2),
+    # transforms.RandomAffine(0, translate=(0.05, 0.05)),
+    # transforms.RandomHorizontalFlip(),
+    # transforms.RandomRotation(5),
+    # transforms.RandomGrayscale(),
     transforms.ToTensor(),
 ])
 
@@ -44,6 +52,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 net = ResNet50()
+if opt.pretrained:
+    net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
 net.to(device)
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()
@@ -76,9 +86,10 @@ def train(epoch):
 
         if step % 100 == 0:
             print("epoch", epoch, "step", step, "loss", loss.item())
-    logx.metric('train', {'loss': train_loss}, epoch=epoch)
+
     train_acc = correct / total
     print("train accuracy", train_acc)
+    logx.metric('train', {'loss': train_loss, 'accuracy': train_acc}, epoch=epoch)
 
 
 def valid(epoch):
@@ -98,9 +109,9 @@ def valid(epoch):
         valid_loss += loss.item()
         total += y.size(0)
         correct += (pred == y).squeeze().sum().cpu().numpy()
-    logx.metric('val', {'loss': valid_loss}, epoch=epoch)
     valid_acc = correct / total
     print("valid accuracy", valid_acc)
+    logx.metric('val', {'loss': valid_loss, 'accuracy': valid_acc}, epoch=epoch)
     return valid_acc
 
 
@@ -108,8 +119,8 @@ for i in range(EPOCH):
     train(i)
     scheduler.step()
     valid_acc = valid(i)
-    logx.save_model({'state_dict': net.state_dict()}, metric=best_acc, epoch=i, higher_better=True, delete_old=True)
     if valid_acc > best_acc:
         best_acc = valid_acc
-        torch.save(net.state_dict(), 'weights.pth')
+    logx.save_model({'state_dict': net.state_dict()}, metric=best_acc, epoch=i, higher_better=True, delete_old=True)
+
 
