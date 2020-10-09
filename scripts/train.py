@@ -7,38 +7,45 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from runx.logx import logx
 
-
-from model import ResNet50
+from models.varg_facenet import varGFaceNet
 from data_loader import TrainDataset
 from optimizer import RAdam
 from utils import get_logdir
 
 parser = ArgumentParser()
 parser.add_argument("--pretrained", type=str, default=None)
+parser.add_argument("--model", type=str, default="resnet50")
 opt = parser.parse_args()
 
 # 超参数设置
 EPOCH = 50
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 LR = 0.001
+IMG_SIZE = 112
 
 logx.initialize(get_logdir("../runs/"), coolname=True, tensorboard=True)
 
 # 数据加载
 desc_train = '../dataset/new_train.csv'
 desc_valid = '../dataset/new_valid.csv'
+normMean = [0.5960974, 0.45659876, 0.39084694]
+normStd = [0.25935432, 0.23155987, 0.22708039]
 
 transform_train = transforms.Compose([
-    # transforms.RandomCrop((200, 200), padding=2),
-    # transforms.RandomAffine(0, translate=(0.05, 0.05)),
-    # transforms.RandomHorizontalFlip(),
-    # transforms.RandomRotation(5),
-    # transforms.RandomGrayscale(),
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
+    transforms.RandomCrop((IMG_SIZE, IMG_SIZE), padding=4),
+    transforms.RandomAffine(0, translate=(0.05, 0.05)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(5),
+    transforms.RandomGrayscale(),
     transforms.ToTensor(),
+    transforms.Normalize(mean=normMean, std=normStd)
 ])
 
 transform_test = transforms.Compose([
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
+    transforms.Normalize(mean=normMean, std=normStd)
 ])
 train_data = TrainDataset(desc_train, data_folder="../dataset/train/", transform=transform_train)
 valid_data = TrainDataset(desc_valid, data_folder="../dataset/train/", transform=transform_test)
@@ -51,7 +58,7 @@ valid_loader = DataLoader(dataset=valid_data, batch_size=BATCH_SIZE)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-net = ResNet50()
+net = varGFaceNet()
 if opt.pretrained:
     net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
 net.to(device)
@@ -61,8 +68,6 @@ criterion = nn.CrossEntropyLoss()
 # optimizer = optim.AdamW(net.parameters(), lr=LR)
 optimizer = RAdam(net.parameters(), lr=LR)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
-
-best_acc = 0
 
 
 def train(epoch):
@@ -119,8 +124,6 @@ for i in range(EPOCH):
     train(i)
     scheduler.step()
     valid_acc = valid(i)
-    if valid_acc > best_acc:
-        best_acc = valid_acc
-    logx.save_model({'state_dict': net.state_dict()}, metric=best_acc, epoch=i, higher_better=True, delete_old=True)
+    logx.save_model({'state_dict': net.state_dict()}, metric=valid_acc, epoch=i, higher_better=True, delete_old=True)
 
 

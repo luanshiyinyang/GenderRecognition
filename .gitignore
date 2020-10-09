@@ -5,3 +5,4 @@ dataset/
 runs/
 
 !/dataset/tips.txt
+submit.csv

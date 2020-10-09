@@ -111,8 +111,14 @@ class ResNet(nn.Module):
 def ResNet50():
     return ResNet([3, 4, 6, 3])
 
+def ResNet101():
+    return ResNet([3, 4, 23, 3])
+
+def ResNet152():
+    return ResNet([3, 8, 36, 3])
+
 
 if __name__ == '__main__':
-    net = ResNet50()
+    net = ResNet101()
     data = torch.zeros((32, 3, 200, 200))
     print(net(data).size())
