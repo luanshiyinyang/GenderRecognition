@@ -10,7 +10,7 @@ from runx.logx import logx
 from models.varg_facenet import varGFaceNet
 from data_loader import TrainDataset
 from optimizer import RAdam
-from utils import get_logdir
+from utils import get_logdir, get_exp_num
 
 parser = ArgumentParser()
 parser.add_argument("--pretrained", type=str, default=None)
@@ -23,13 +23,16 @@ BATCH_SIZE = 16
 LR = 0.001
 IMG_SIZE = 112
 
-logx.initialize(get_logdir("../runs/"), coolname=True, tensorboard=True)
+logx.initialize(get_exp_num("../runs/"), coolname=True, tensorboard=True)
 
 # 数据加载
 desc_train = '../dataset/new_train.csv'
 desc_valid = '../dataset/new_valid.csv'
-normMean = [0.5960974, 0.45659876, 0.39084694]
-normStd = [0.25935432, 0.23155987, 0.22708039]
+# 200
+# normMean = [0.5960974, 0.45659876, 0.39084694]
+# normStd = [0.25935432, 0.23155987, 0.22708039]
+normMean = [0.5961039, 0.45659694, 0.39085034]
+normStd = [0.25910342, 0.23129477, 0.22679278]
 
 transform_train = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),

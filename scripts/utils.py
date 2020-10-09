@@ -21,7 +21,7 @@ def get_mean_std():
     len_ = len(imgs_path_list)
     i = 0
     for item in imgs_path_list:
-        img = Image.open(os.path.join(imgs_path, item)).convert('RGB')
+        img = Image.open(os.path.join(imgs_path, item)).convert('RGB').resize((112, 112))
         img = np.array(img)
         img = img[:, :, :, np.newaxis]
         img_list.append(img)
@@ -37,6 +37,11 @@ def get_mean_std():
         stdevs.append(np.std(pixels))
     print("normMean = {}".format(means))
     print("normStd = {}".format(stdevs))
+
+
+def get_exp_num(log_path):
+    num = len(os.listdir(log_path))
+    return os.path.join(log_path, "exp{}".format(num))
 
 
 if __name__ == '__main__':
