@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 from models.resnet import ResNet50
 from models.varg_facenet import varGFaceNet
+from models.efficientnet import Efficientnet
 from data_loader import TestDataset
 
 parser = ArgumentParser()
@@ -31,8 +32,8 @@ transform_test = transforms.Compose([
 valid_data = TestDataset(desc_test, data_folder="../dataset/train", transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=4, shuffle=False)
 
-net = varGFaceNet()
-net.load_state_dict(torch.load(opt.weights)['state_dict'])
+net = Efficientnet()
+# net.load_state_dict(torch.load(opt.weights)['state_dict'])
 net.to("cuda")
 net.eval()
 if opt.tta == 'yes':
@@ -41,7 +42,7 @@ if opt.tta == 'yes':
             tta.HorizontalFlip(),
         ]
     )
-    net = tta.ClassificationTTAWrapper(net, transforms)
+    net = tta.ClassificationTTAWrapper(net, transforms, merge_mode='max')
 
 rst = []
 for x, _ in tqdm(test_loader):

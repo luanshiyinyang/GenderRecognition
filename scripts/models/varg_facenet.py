@@ -234,16 +234,13 @@ class VarGFaceNet(nn.Module):
         self.body_layer = nn.Sequential(*body)
         self.embedding = add_emb_block(int(filter_list[num_stage] * multiplier), last_channels, emb_size, group_base=8)
         self._initialize_weights()
-        self.fc1 = nn.Linear(512, 256)
-        self.dropout = nn.Dropout()
-        self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128, 2)
+        self.fc = nn.Linear(512, 2)
 
     def forward(self, x):
         x = self.head(x)
         x = self.body_layer(x)
         x = self.embedding(x)
-        return self.fc3(self.fc2(self.dropout(self.fc1(l2_norm(x)))))
+        return self.fc(l2_norm(x))
 
     def _initialize_weights(self):
         for m in self.modules():
