@@ -18,10 +18,8 @@ parser.add_argument("--tta", type=str, default='no')
 opt = parser.parse_args()
 
 desc_test = '../dataset/test.csv'
-# normMean = [0.5960974, 0.45659876, 0.39084694]
-# normStd = [0.25935432, 0.23155987, 0.22708039]
-normMean = [0.5961039, 0.45659694, 0.39085034]
-normStd = [0.25910342, 0.23129477, 0.22679278]
+normMean = [0.59610415, 0.4566031, 0.39085707]
+normStd = [0.25930327, 0.23150527, 0.22701454]
 transform_test = transforms.Compose([
     transforms.Resize((112, 112)),
     transforms.ToTensor(),
@@ -41,7 +39,7 @@ if opt.tta == 'yes':
             tta.HorizontalFlip(),
         ]
     )
-    net = tta.ClassificationTTAWrapper(net, transforms)
+    net = tta.ClassificationTTAWrapper(net, transforms, merge_mode='mean')
 
 rst = []
 files = []

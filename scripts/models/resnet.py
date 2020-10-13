@@ -3,9 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-__all__ = ['ResNet50', ]
-
-
 def Conv1(in_planes, places, stride=2):
     return nn.Sequential(
         nn.Conv2d(in_channels=in_planes,out_channels=places,kernel_size=7,stride=stride,padding=3, bias=False),
@@ -111,8 +108,10 @@ class ResNet(nn.Module):
 def ResNet50():
     return ResNet([3, 4, 6, 3])
 
+
 def ResNet101():
     return ResNet([3, 4, 23, 3])
+
 
 def ResNet152():
     return ResNet([3, 8, 36, 3])

@@ -11,7 +11,7 @@ def get_logdir(root_path):
 
 
 def get_mean_std():
-    img_h, img_w = 200, 200  # 根据自己数据集适当调整，影响不大
+    img_h, img_w = 224, 224  # 根据自己数据集适当调整，影响不大
     means, stdevs = [], []
     img_list = []
 
@@ -21,7 +21,7 @@ def get_mean_std():
     len_ = len(imgs_path_list)
     i = 0
     for item in imgs_path_list:
-        img = Image.open(os.path.join(imgs_path, item)).convert('RGB').resize((112, 112))
+        img = Image.open(os.path.join(imgs_path, item)).convert('RGB').resize((img_w, img_h))
         img = np.array(img)
         img = img[:, :, :, np.newaxis]
         img_list.append(img)

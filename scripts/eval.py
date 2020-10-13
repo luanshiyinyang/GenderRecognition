@@ -10,7 +10,6 @@ from tqdm import tqdm
 
 from models.resnet import ResNet50
 from models.varg_facenet import varGFaceNet
-from models.efficientnet import Efficientnet
 from data_loader import TestDataset
 
 parser = ArgumentParser()
@@ -20,10 +19,8 @@ opt = parser.parse_args()
 
 
 desc_test = '../dataset/new_valid.csv'
-# normMean = [0.5960974, 0.45659876, 0.39084694]
-# normStd = [0.25935432, 0.23155987, 0.22708039]
-normMean = [0.5961039, 0.45659694, 0.39085034]
-normStd = [0.25910342, 0.23129477, 0.22679278]
+normMean = [0.59610415, 0.4566031, 0.39085707]
+normStd = [0.25930327, 0.23150527, 0.22701454]
 transform_test = transforms.Compose([
     transforms.Resize((112, 112)),
     transforms.ToTensor(),
@@ -32,8 +29,8 @@ transform_test = transforms.Compose([
 valid_data = TestDataset(desc_test, data_folder="../dataset/train", transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=4, shuffle=False)
 
-net = Efficientnet()
-# net.load_state_dict(torch.load(opt.weights)['state_dict'])
+net = varGFaceNet()
+net.load_state_dict(torch.load(opt.weights)['state_dict'])
 net.to("cuda")
 net.eval()
 if opt.tta == 'yes':
@@ -42,7 +39,7 @@ if opt.tta == 'yes':
             tta.HorizontalFlip(),
         ]
     )
-    net = tta.ClassificationTTAWrapper(net, transforms, merge_mode='max')
+    net = tta.ClassificationTTAWrapper(net, transforms, merge_mode='mean')
 
 rst = []
 for x, _ in tqdm(test_loader):
