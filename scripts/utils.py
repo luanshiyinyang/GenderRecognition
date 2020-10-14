@@ -1,5 +1,7 @@
 import time
 import os
+from glob import glob
+
 import numpy as np
 from PIL import Image
 
@@ -44,5 +46,13 @@ def get_exp_num(log_path):
     return os.path.join(log_path, "exp{}".format(num))
 
 
+def get_kfold_model(path):
+    all_path = []
+    for exp in os.listdir(path):
+        model_path = glob(os.path.join(path, exp) + '/best*.pth')[0]
+        all_path.append(model_path)
+    return all_path
+
+
 if __name__ == '__main__':
-    get_mean_std()
+    get_kfold_model("../runs/")

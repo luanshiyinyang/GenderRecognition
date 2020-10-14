@@ -27,7 +27,7 @@ transform_test = transforms.Compose([
     transforms.Normalize(mean=normMean, std=normStd)
 ])
 valid_data = TestDataset(desc_test, data_folder="../dataset/train", transform=transform_test)
-test_loader = DataLoader(dataset=valid_data, batch_size=4, shuffle=False)
+test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
 net = varGFaceNet()
 net.load_state_dict(torch.load(opt.weights)['state_dict'])
