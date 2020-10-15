@@ -7,13 +7,15 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from scipy import stats
+import ttach as tta
 
 from models.varg_facenet import varGFaceNet
 from data_loader import TestDataset
 from utils import get_kfold_model
 
 parser = ArgumentParser()
-parser.add_argument("--weight_path", type=str, default="../runs/exp10/")
+parser.add_argument("--weights", type=str, default="../runs/exp10/")
+parser.add_argument("--tta", type=str, default='no')
 opt = parser.parse_args()
 
 desc_test = '../dataset/new_valid.csv'
@@ -28,9 +30,17 @@ valid_data = TestDataset(desc_test, data_folder="../dataset/train", transform=tr
 test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
 models = []
-for path in get_kfold_model(opt.weight_path):
+for path in get_kfold_model(opt.weights):
     model = varGFaceNet()
     model.load_state_dict(torch.load(path)['state_dict'])
+
+    if opt.tta == 'yes':
+        transforms = tta.Compose(
+            [
+                tta.HorizontalFlip(),
+            ]
+        )
+        model = tta.ClassificationTTAWrapper(model, transforms, merge_mode='mean')
     models.append(model)
 
 rst = [[] for i in range(len(models))]
@@ -46,7 +56,8 @@ for index in range(len(models)):
         rst[index].extend(list(pred.cpu().numpy()))
     rst[index] = np.array(rst[index])
 
-# sum pred
-final_rst = stats.mode(np.array(rst))[0]
+# mode pred
+final_rst = stats.mode(np.array(rst))[0][0]
 label = list(pd.read_csv("../dataset/new_valid.csv", encoding="utf8")['label'])
-print(sum(final_rst.reshape(-1) == np.array(label)) / len(label))
+print(sum(final_rst == np.array(label)) / len(label))
+

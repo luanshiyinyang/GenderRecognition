@@ -119,5 +119,5 @@ def ResNet152():
 
 if __name__ == '__main__':
     net = ResNet101()
-    data = torch.zeros((32, 3, 200, 200))
+    data = torch.zeros((32, 3, 224, 224))
     print(net(data).size())

@@ -9,7 +9,10 @@ from tqdm import tqdm
 
 from models.resnet import ResNet50
 from models.varg_facenet import varGFaceNet
+from models.tresnet.tresnet import tresnet
 from data_loader import TestDataset
+
+IMG_SIZE = 224
 
 
 parser = ArgumentParser()
@@ -21,7 +24,7 @@ desc_test = '../dataset/test.csv'
 normMean = [0.59610415, 0.4566031, 0.39085707]
 normStd = [0.25930327, 0.23150527, 0.22701454]
 transform_test = transforms.Compose([
-    transforms.Resize((112, 112)),
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
     transforms.Normalize(mean=normMean, std=normStd)
 ])
@@ -29,7 +32,7 @@ transform_test = transforms.Compose([
 valid_data = TestDataset(desc_test, data_folder="../dataset/test", transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
-net = varGFaceNet()
+net = tresnet()
 net.load_state_dict(torch.load(opt.weights)['state_dict'])
 net.to("cuda")
 net.eval()

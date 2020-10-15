@@ -24,7 +24,7 @@ log_dir = get_exp_num("../runs/")
 
 # 超参数设置
 EPOCH = 50
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 LR = 0.001
 IMG_SIZE = 112
 
@@ -120,7 +120,7 @@ for k in range(5):
         net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
     net.to(device)
     # 定义损失函数和优化方式
-    criterion = nn.CrossEntropyLoss()
+    criterion = LabelSmoothSoftmaxCE()
     optimizer = Ranger(net.parameters(), lr=LR)
 
     for i in range(start_epoch, start_epoch + EPOCH):
