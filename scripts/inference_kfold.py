@@ -9,34 +9,33 @@ from tqdm import tqdm
 from scipy import stats
 import ttach as tta
 
-from models.varg_facenet import varGFaceNet
 from data_loader import TestDataset
-from utils import get_kfold_model
+from utils import get_kfold_model, get_model_by_name
 
 parser = ArgumentParser()
-parser.add_argument("--weights", type=str, default="../runs/exp10/")
+parser.add_argument("--weights", type=str, default="../runs/exp12/")
 parser.add_argument("--tta", type=str, default='no')
 opt = parser.parse_args()
 
 desc_test = '../dataset/test.csv'
-normMean = [0.59610415, 0.4566031, 0.39085707]
-normStd = [0.25930327, 0.23150527, 0.22701454]
+normMean = [0.59610313, 0.45660403, 0.39085752]
+normStd = [0.25930294, 0.23150486, 0.22701606]
 transform_test = transforms.Compose([
-    transforms.Resize((112, 112)),
+    transforms.Resize((160, 160)),
     transforms.ToTensor(),
     transforms.Normalize(mean=normMean, std=normStd)
 ])
 valid_data = TestDataset(desc_test, data_folder="../dataset/test", transform=transform_test)
-test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
+test_loader = DataLoader(dataset=valid_data, batch_size=32, shuffle=False)
 
 models = []
 for path in get_kfold_model(opt.weights):
-    model = varGFaceNet()
+    model = get_model_by_name('facenet')
     model.load_state_dict(torch.load(path)['state_dict'])
     if opt.tta == 'yes':
         transforms = tta.Compose(
             [
-                tta.HorizontalFlip(),
+                tta.HorizontalFlip()
             ]
         )
         model = tta.ClassificationTTAWrapper(model, transforms, merge_mode='mean')

@@ -35,3 +35,18 @@ class LabelSmoothSoftmaxCE(nn.Module):
             loss = -torch.sum(logs*label, dim=1)
         return loss
 
+
+class JointLoss(nn.Module):
+
+    def __init__(self, first=nn.CrossEntropyLoss(),
+                 second=LabelSmoothSoftmaxCE(),
+                 first_weight=0.5,
+                 second_weight=0.5):
+        super(JointLoss, self).__init__()
+        self.loss1 = first
+        self.loss2 = second
+        self.coef1 = first_weight
+        self.coef2 = second_weight
+
+    def forward(self, logits, labels):
+        return self.loss1(logits, labels) * self.coef1 + self.loss2(logits, labels) * self.coef2

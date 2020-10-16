@@ -9,11 +9,10 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from runx.logx import logx
 
-from models.varg_facenet import varGFaceNet
 from data_loader import TrainDataset
 from optimizer import Ranger
-from loss import LabelSmoothSoftmaxCE
-from utils import get_exp_num
+from losses import LabelSmoothSoftmaxCE
+from utils import get_exp_num, get_model_by_name
 
 warnings.filterwarnings('ignore')
 parser = ArgumentParser()
@@ -26,11 +25,12 @@ log_dir = get_exp_num("../runs/")
 EPOCH = 50
 BATCH_SIZE = 64
 LR = 0.001
-IMG_SIZE = 112
+IMG_SIZE = 160
 
 
-normMean = [0.59610415, 0.4566031, 0.39085707]
-normStd = [0.25930327, 0.23150527, 0.22701454]
+normMean = [0.59610313, 0.45660403, 0.39085752]
+normStd = [0.25930294, 0.23150486, 0.22701606]
+
 
 transform_train = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
@@ -115,7 +115,7 @@ for k in range(5):
     # 定义是否使用GPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    net = varGFaceNet()
+    net = get_model_by_name(opt.model)
     if opt.pretrained:
         net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
     net.to(device)

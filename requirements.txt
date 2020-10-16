@@ -7,3 +7,6 @@ matplotlib
 runx
 ttach
 scipy
+tqdm
+PyYAML
+scikit-learn

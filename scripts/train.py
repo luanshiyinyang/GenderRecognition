@@ -10,7 +10,8 @@ from runx.logx import logx
 
 from data_loader import TrainDataset
 from optimizer import Ranger
-from utils import get_exp_num, get_model_by_name
+from utils import get_exp_num, get_model_by_name, Config
+from losses import JointLoss
 
 warnings.filterwarnings('ignore')
 parser = ArgumentParser()
@@ -20,10 +21,11 @@ opt = parser.parse_args()
 
 
 # 超参数设置
-EPOCH = 50
-BATCH_SIZE = 32
-LR = 0.001
-IMG_SIZE = 160
+cfg = Config()
+EPOCH = cfg.epochs
+BATCH_SIZE = cfg.bs
+LR = cfg.lr
+IMG_SIZE = cfg.img_size
 
 logx.initialize(get_exp_num("../runs/"), coolname=True, tensorboard=True)
 start_epoch = 0
@@ -67,7 +69,7 @@ if opt.pretrained:
     net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
 net.to(device)
 # 定义损失函数和优化方式
-criterion = nn.CrossEntropyLoss()
+criterion = JointLoss()
 # optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4)
 # optimizer = optim.AdamW(net.parameters(), lr=LR)
 optimizer = Ranger(net.parameters(), lr=LR, weight_decay=5e-4)

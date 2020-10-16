@@ -8,28 +8,28 @@ import numpy as np
 import ttach as tta
 from tqdm import tqdm
 
-from models.tresnet.tresnet import tresnet
-from models.varg_facenet import varGFaceNet
 from data_loader import TestDataset
+from utils import get_model_by_name
 
 parser = ArgumentParser()
 parser.add_argument("--weights", type=str, default=None)
 parser.add_argument("--tta", type=str, default='no')
 opt = parser.parse_args()
+IMG_SIZE = 160
 
 
 desc_test = '../dataset/new_valid.csv'
 normMean = [0.59610313, 0.45660403, 0.39085752]
 normStd = [0.25930294, 0.23150486, 0.22701606]
 transform_test = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
     transforms.Normalize(mean=normMean, std=normStd)
 ])
 valid_data = TestDataset(desc_test, data_folder="../dataset/train", transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=32, shuffle=False)
 
-net = tresnet()
+net = get_model_by_name('facenet')
 net.load_state_dict(torch.load(opt.weights)['state_dict'])
 net.to("cuda")
 net.eval()
