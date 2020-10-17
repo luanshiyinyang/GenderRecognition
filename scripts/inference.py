@@ -8,9 +8,11 @@ import ttach as tta
 from tqdm import tqdm
 
 from data_loader import TestDataset
-from utils import get_model_by_name
+from utils import get_model_by_name, Config
 
-IMG_SIZE = 160
+
+cfg = Config()
+IMG_SIZE = cfg.img_size
 
 
 parser = ArgumentParser()
@@ -28,9 +30,9 @@ transform_test = transforms.Compose([
 ])
 
 valid_data = TestDataset(desc_test, data_folder="../dataset/test", transform=transform_test)
-test_loader = DataLoader(dataset=valid_data, batch_size=32, shuffle=False)
+test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
-net = get_model_by_name('facenet')
+net = get_model_by_name(cfg.model_name)
 net.load_state_dict(torch.load(opt.weights)['state_dict'])
 net.to("cuda")
 net.eval()

@@ -55,7 +55,7 @@ def get_exp_num(log_path):
 def get_kfold_model(path):
     all_path = []
     for exp in os.listdir(path):
-        model_path = glob(os.path.join(path, exp) + '/last*.pth')[0]
+        model_path = glob(os.path.join(path, exp) + '/best*.pth')[0]
         all_path.append(model_path)
     return all_path
 
@@ -66,6 +66,8 @@ def get_model_by_name(name='resnet50'):
         model =  ResNet50()
     elif name == 'facenet':
         model = facenet()
+    elif name == 'resnest':
+        model = resnest50()
     else:
         model = resnest50()
     return model
@@ -91,7 +93,10 @@ class Config(object):
         self.bs = training_info['bs']
         self.img_size = training_info['img_size']
         self.epochs = training_info['epochs']
+        self.model_name = training_info['model_name']
 
 
 if __name__ == '__main__':
-    get_mean_std()
+    import torch
+    net = get_model_by_name('resnest')
+    print(net(torch.randn((32, 3, 200, 200))).size())

@@ -23,16 +23,16 @@ class LabelSmoothSoftmaxCE(nn.Module):
         label = label.clone()
         label[ignore] = 0
         lb_one_hot = logits.data.clone().zero_().scatter_(1, label.unsqueeze(1), 1)
-        label = self.lb_pos * lb_one_hot + self.lb_neg * (1-lb_one_hot)
+        label = self.lb_pos * lb_one_hot + self.lb_neg * (1 - lb_one_hot)
         ignore = ignore.nonzero()
         _, M = ignore.size()
         a, *b = ignore.chunk(M, dim=1)
         label[[a, torch.arange(label.size(1)), *b]] = 0
 
         if self.reduction == 'mean':
-            loss = -torch.sum(torch.sum(logs*label, dim=1)) / n_valid
+            loss = -torch.sum(torch.sum(logs * label, dim=1)) / n_valid
         elif self.reduction == 'none':
-            loss = -torch.sum(logs*label, dim=1)
+            loss = -torch.sum(logs * label, dim=1)
         return loss
 
 

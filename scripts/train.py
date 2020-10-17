@@ -16,7 +16,7 @@ from losses import JointLoss
 warnings.filterwarnings('ignore')
 parser = ArgumentParser()
 parser.add_argument("--pretrained", type=str, default=None)
-parser.add_argument("--model", type=str, default="facenet")
+parser.add_argument("--model", type=str, default="resnest")
 opt = parser.parse_args()
 
 
@@ -64,7 +64,7 @@ valid_loader = DataLoader(dataset=valid_data, batch_size=BATCH_SIZE)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-net = get_model_by_name(opt.model)
+net = get_model_by_name(opt.model_name)
 if opt.pretrained:
     net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
 net.to(device)

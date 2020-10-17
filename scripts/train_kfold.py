@@ -12,20 +12,19 @@ from runx.logx import logx
 from data_loader import TrainDataset
 from optimizer import Ranger
 from losses import LabelSmoothSoftmaxCE
-from utils import get_exp_num, get_model_by_name
+from utils import get_exp_num, get_model_by_name, Config
 
 warnings.filterwarnings('ignore')
 parser = ArgumentParser()
 parser.add_argument("--pretrained", type=str, default=None)
-parser.add_argument("--model", type=str, default="facenet")
 opt = parser.parse_args()
 log_dir = get_exp_num("../runs/")
-
+cfg = Config()
 # 超参数设置
-EPOCH = 50
-BATCH_SIZE = 64
-LR = 0.001
-IMG_SIZE = 160
+EPOCH = cfg.epochs
+BATCH_SIZE = cfg.bs
+LR = cfg.lr
+IMG_SIZE = cfg.img_size
 
 
 normMean = [0.59610313, 0.45660403, 0.39085752]
@@ -115,7 +114,7 @@ for k in range(5):
     # 定义是否使用GPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    net = get_model_by_name(opt.model)
+    net = get_model_by_name(cfg.model_name)
     if opt.pretrained:
         net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
     net.to(device)

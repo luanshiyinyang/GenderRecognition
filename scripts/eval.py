@@ -9,13 +9,14 @@ import ttach as tta
 from tqdm import tqdm
 
 from data_loader import TestDataset
-from utils import get_model_by_name
+from utils import get_model_by_name, Config
 
 parser = ArgumentParser()
 parser.add_argument("--weights", type=str, default=None)
 parser.add_argument("--tta", type=str, default='no')
 opt = parser.parse_args()
-IMG_SIZE = 160
+cfg = Config()
+IMG_SIZE = cfg.img_size
 
 
 desc_test = '../dataset/new_valid.csv'
@@ -27,9 +28,9 @@ transform_test = transforms.Compose([
     transforms.Normalize(mean=normMean, std=normStd)
 ])
 valid_data = TestDataset(desc_test, data_folder="../dataset/train", transform=transform_test)
-test_loader = DataLoader(dataset=valid_data, batch_size=32, shuffle=False)
+test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
-net = get_model_by_name('facenet')
+net = get_model_by_name(cfg.model_name)
 net.load_state_dict(torch.load(opt.weights)['state_dict'])
 net.to("cuda")
 net.eval()

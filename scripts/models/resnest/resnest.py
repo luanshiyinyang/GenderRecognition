@@ -72,4 +72,4 @@ def resnest269(pretrained=False, root='~/.encoding/models', **kwargs):
 
 if __name__ == '__main__':
     net = resnest50()
-    print(net)
+    print(net(torch.randn(32, 3, 200, 200)))
