@@ -63,13 +63,15 @@ def get_kfold_model(path):
 def get_model_by_name(name='resnet50'):
     model = None
     if name == 'resnet50':
-        model =  ResNet50()
+        model = ResNet50()
     elif name == 'facenet':
         model = facenet()
     elif name == 'resnest':
         model = resnest50()
+    elif name == 'vargfacenet':
+        model = varGFaceNet()
     else:
-        model = resnest50()
+        raise ValueError("no model like this")
     return model
 
 
