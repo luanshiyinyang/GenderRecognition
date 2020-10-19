@@ -3,6 +3,7 @@
 __pycache__/
 dataset/
 runs/
+results/
 
 !/dataset/tips.txt
 submit.csv
