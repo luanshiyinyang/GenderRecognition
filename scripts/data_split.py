@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import KFold
 
-
 np.random.seed(2020)
 df_raw = pd.read_csv("../dataset/train.csv", encoding="utf8")
 sample_index = np.arange(len(df_raw))

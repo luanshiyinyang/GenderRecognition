@@ -9,7 +9,6 @@ import yaml
 from models.resnet import ResNet50
 from models.varg_facenet import varGFaceNet
 from models.facenet import facenet
-from models.resnest.resnest import resnest50
 
 
 def get_logdir(root_path):
@@ -66,8 +65,6 @@ def get_model_by_name(name='resnet50'):
         model = ResNet50()
     elif name == 'facenet':
         model = facenet()
-    elif name == 'resnest':
-        model = resnest50()
     elif name == 'vargfacenet':
         model = varGFaceNet()
     else:
@@ -87,18 +84,22 @@ def read_config(config_file="../config/cfg.yaml"):
 
 class Config(object):
     def __init__(self):
-        config = read_config()
+        self.config = read_config()
 
         # training info
-        training_info = config['training']
+        training_info = self.config['training']
         self.lr = training_info['lr']
         self.bs = training_info['bs']
         self.img_size = training_info['img_size']
         self.epochs = training_info['epochs']
         self.model_name = training_info['model_name']
 
+    def save_config(self, filename):
+        assert filename.endswith(".yaml"), 'not a yaml file'
+        with open(filename, 'w') as f:
+            yaml.dump(self.config, f, sort_keys=False)
+
 
 if __name__ == '__main__':
-    import torch
-    net = get_model_by_name('resnest')
-    print(net(torch.randn((32, 3, 200, 200))).size())
+    cfg = Config()
+    cfg.save_config("rst.yaml")
