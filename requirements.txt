@@ -2,7 +2,7 @@ torch
 pandas
 numpy
 torchvision
-pillow
+opencv-python
 matplotlib
 runx
 ttach
@@ -10,3 +10,4 @@ scipy
 tqdm
 PyYAML
 scikit-learn
+albumentations

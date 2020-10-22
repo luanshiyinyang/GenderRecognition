@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from runx.logx import logx
 
-from data_loader import TrainDataset
+from data_loader import TrainDataset, get_transforms
 from optimizer import Ranger
 from utils import get_exp_num, get_model_by_name, Config
 from losses import JointLoss
@@ -16,7 +16,6 @@ from losses import JointLoss
 warnings.filterwarnings('ignore')
 parser = ArgumentParser()
 parser.add_argument("--pretrained", type=str, default=None)
-parser.add_argument("--model", type=str, default="resnest")
 opt = parser.parse_args()
 
 
@@ -37,22 +36,9 @@ desc_valid = '../dataset/new_valid.csv'
 normMean = [0.59610313, 0.45660403, 0.39085752]
 normStd = [0.25930294, 0.23150486, 0.22701606]
 
+transform_train, transform_test = get_transforms(cfg.img_size)
 
-transform_train = transforms.Compose([
-    transforms.Resize((IMG_SIZE, IMG_SIZE)),
-    transforms.RandomAffine(0, translate=(0.05, 0.05)),
-    transforms.RandomCrop(IMG_SIZE, padding=2),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomGrayscale(),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=normMean, std=normStd)
-])
 
-transform_test = transforms.Compose([
-    transforms.Resize((IMG_SIZE, IMG_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=normMean, std=normStd)
-])
 train_data = TrainDataset(desc_train, data_folder="../dataset/train/", transform=transform_train)
 valid_data = TrainDataset(desc_valid, data_folder="../dataset/train/", transform=transform_test)
 
@@ -64,14 +50,12 @@ valid_loader = DataLoader(dataset=valid_data, batch_size=BATCH_SIZE)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-net = get_model_by_name(opt.model_name)
+net = get_model_by_name(cfg.model_name)
 if opt.pretrained:
     net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
 net.to(device)
 # 定义损失函数和优化方式
 criterion = JointLoss()
-# optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4)
-# optimizer = optim.AdamW(net.parameters(), lr=LR)
 optimizer = Ranger(net.parameters(), lr=LR, weight_decay=5e-4)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1, last_epoch=start_epoch-1)
 
