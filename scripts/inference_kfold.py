@@ -9,7 +9,7 @@ from tqdm import tqdm
 from scipy import stats
 import ttach as tta
 
-from data_loader import TestDataset
+from dataset import TestDataset
 from utils import get_kfold_model, get_model_by_name, Config
 
 parser = ArgumentParser()

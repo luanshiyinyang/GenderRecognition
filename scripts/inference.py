@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import os
 
 import torch
 from torchvision import transforms
@@ -7,7 +8,7 @@ import pandas as pd
 import ttach as tta
 from tqdm import tqdm
 
-from data_loader import TestDataset
+from dataset import TestDataset
 from utils import get_model_by_name, Config
 
 
@@ -20,7 +21,7 @@ parser.add_argument("--weights", type=str, default=None)
 parser.add_argument("--tta", type=str, default='no')
 opt = parser.parse_args()
 
-desc_test = '../dataset/test.csv'
+desc_test = os.path.join(cfg.ds_folder, 'test.csv')
 normMean = [0.59610313, 0.45660403, 0.39085752]
 normStd = [0.25930294, 0.23150486, 0.22701606]
 transform_test = transforms.Compose([
@@ -29,7 +30,7 @@ transform_test = transforms.Compose([
     transforms.Normalize(mean=normMean, std=normStd)
 ])
 
-valid_data = TestDataset(desc_test, data_folder="../dataset/test", transform=transform_test)
+valid_data = TestDataset(desc_test, data_folder=os.path.join(cfg.ds_folder, "test"), transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
 net = get_model_by_name(cfg.model_name)

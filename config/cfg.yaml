@@ -4,3 +4,5 @@ training:
   img_size: 112
   bs: 64
   epochs: 50
+dataset:
+  root: /home/zhouchen/Projects/GenderRecognition/dataset

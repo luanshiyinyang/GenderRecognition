@@ -1,14 +1,13 @@
 from argparse import ArgumentParser
 import warnings
+import os
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
 from runx.logx import logx
 
-from data_loader import TrainDataset, get_transforms
+from dataset import TrainDataset, get_transforms
 from optimizer import Ranger
 from utils import get_exp_num, get_model_by_name, Config
 from losses import JointLoss
@@ -31,16 +30,15 @@ start_epoch = 0
 
 
 # 数据加载
-desc_train = '../dataset/new_train.csv'
-desc_valid = '../dataset/new_valid.csv'
-normMean = [0.59610313, 0.45660403, 0.39085752]
-normStd = [0.25930294, 0.23150486, 0.22701606]
+desc_train = os.path.join(cfg.ds_folder, 'new_train.csv')
+desc_valid = os.path.join(cfg.ds_folder, 'new_valid.csv')
+
 
 transform_train, transform_test = get_transforms(cfg.img_size)
 
 
-train_data = TrainDataset(desc_train, data_folder="../dataset/train/", transform=transform_train)
-valid_data = TrainDataset(desc_valid, data_folder="../dataset/train/", transform=transform_test)
+train_data = TrainDataset(desc_train, data_folder=os.path.join(cfg.ds_folder, 'train'), transform=transform_train)
+valid_data = TrainDataset(desc_valid, data_folder=os.path.join(cfg.ds_folder, 'train'), transform=transform_test)
 
 # 构建DataLoader
 train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)

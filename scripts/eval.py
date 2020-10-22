@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import os
 
 import torch
 from torchvision import transforms
@@ -8,7 +9,7 @@ import numpy as np
 import ttach as tta
 from tqdm import tqdm
 
-from data_loader import TestDataset
+from dataset import TestDataset
 from utils import get_model_by_name, Config
 
 parser = ArgumentParser()
@@ -27,7 +28,7 @@ transform_test = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=normMean, std=normStd)
 ])
-valid_data = TestDataset(desc_test, data_folder="../dataset/train", transform=transform_test)
+valid_data = TestDataset(desc_test, data_folder=os.path.join(cfg.ds_folder, "train"), transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
 net = get_model_by_name(cfg.model_name)
@@ -48,6 +49,6 @@ for x, _ in tqdm(test_loader):
     out = net(x)
     _, pred = torch.max(out.data, 1)
     rst.extend(list(pred.cpu().numpy()))
-label = list(pd.read_csv("../dataset/new_valid.csv", encoding="utf8")['label'])
+label = list(pd.read_csv(os.path.join(cfg.ds_folder, "new_valid.csv"), encoding="utf8")['label'])
 print(sum(np.array(rst) == np.array(label))/len(rst))
 

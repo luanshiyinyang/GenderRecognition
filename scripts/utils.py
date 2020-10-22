@@ -94,6 +94,10 @@ class Config(object):
         self.epochs = training_info['epochs']
         self.model_name = training_info['model_name']
 
+        # dataset info
+        dataset_info = self.config['dataset']
+        self.ds_folder = dataset_info['root']
+
     def save_config(self, filename):
         assert filename.endswith(".yaml"), 'not a yaml file'
         with open(filename, 'w') as f:

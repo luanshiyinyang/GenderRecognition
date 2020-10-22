@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from runx.logx import logx
 
-from data_loader import TrainDataset
+from dataset import TrainDataset
 from optimizer import Ranger
 from losses import LabelSmoothSoftmaxCE
 from utils import get_exp_num, get_model_by_name, Config
