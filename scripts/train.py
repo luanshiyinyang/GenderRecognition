@@ -25,7 +25,9 @@ BATCH_SIZE = cfg.bs
 LR = cfg.lr
 IMG_SIZE = cfg.img_size
 
-logx.initialize(get_exp_num("../runs/"), coolname=True, tensorboard=True)
+logdir = get_exp_num("../runs/")
+logx.initialize(logdir, coolname=True, tensorboard=True)
+cfg.save_config(os.path.join(logdir, 'cfg.yaml'))
 start_epoch = 0
 
 
@@ -54,8 +56,9 @@ if opt.pretrained:
 net.to(device)
 # 定义损失函数和优化方式
 criterion = JointLoss()
-optimizer = Ranger(net.parameters(), lr=LR, weight_decay=5e-4)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1, last_epoch=start_epoch-1)
+# optimizer = Ranger(net.parameters(), lr=LR, weight_decay=5e-4)
+optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=0.001)
+scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, last_epoch=start_epoch-1, T_max=EPOCH, eta_min=1e-10)
 
 
 def train(epoch):

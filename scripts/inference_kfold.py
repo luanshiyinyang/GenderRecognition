@@ -9,7 +9,7 @@ from tqdm import tqdm
 from scipy import stats
 import ttach as tta
 
-from dataset import TestDataset
+from dataset import TestDataset, get_transforms
 from utils import get_kfold_model, get_model_by_name, Config
 
 parser = ArgumentParser()
@@ -19,13 +19,7 @@ opt = parser.parse_args()
 cfg = Config()
 
 desc_test = '../dataset/test.csv'
-normMean = [0.59610313, 0.45660403, 0.39085752]
-normStd = [0.25930294, 0.23150486, 0.22701606]
-transform_test = transforms.Compose([
-    transforms.Resize((cfg.img_size, cfg.img_size)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=normMean, std=normStd)
-])
+_, transform_test = get_transforms(cfg.img_size)
 valid_data = TestDataset(desc_test, data_folder="../dataset/test", transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=cfg.bs, shuffle=False)
 

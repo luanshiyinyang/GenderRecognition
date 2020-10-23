@@ -8,7 +8,7 @@ import pandas as pd
 import ttach as tta
 from tqdm import tqdm
 
-from dataset import TestDataset
+from dataset import TestDataset, get_transforms
 from utils import get_model_by_name, Config
 
 
@@ -24,13 +24,9 @@ opt = parser.parse_args()
 desc_test = os.path.join(cfg.ds_folder, 'test.csv')
 normMean = [0.59610313, 0.45660403, 0.39085752]
 normStd = [0.25930294, 0.23150486, 0.22701606]
-transform_test = transforms.Compose([
-    transforms.Resize((IMG_SIZE, IMG_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=normMean, std=normStd)
-])
+_, test_tfms = get_transforms(IMG_SIZE)
 
-valid_data = TestDataset(desc_test, data_folder=os.path.join(cfg.ds_folder, "test"), transform=transform_test)
+valid_data = TestDataset(desc_test, data_folder=os.path.join(cfg.ds_folder, "test"), transform=test_tfms)
 test_loader = DataLoader(dataset=valid_data, batch_size=16, shuffle=False)
 
 net = get_model_by_name(cfg.model_name)

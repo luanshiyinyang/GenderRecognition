@@ -1,7 +1,7 @@
 training:
-  model_name: vargfacenet
+  model_name: facenet
   lr: 0.001
-  img_size: 112
+  img_size: 160
   bs: 64
   epochs: 50
 dataset:

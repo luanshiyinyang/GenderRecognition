@@ -3,15 +3,12 @@ import warnings
 import os
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
 from runx.logx import logx
 
-from dataset import TrainDataset
-from optimizer import Ranger
-from losses import LabelSmoothSoftmaxCE
+from dataset import TrainDataset, get_transforms
+from losses import JointLoss
 from utils import get_exp_num, get_model_by_name, Config
 
 warnings.filterwarnings('ignore')
@@ -27,24 +24,7 @@ LR = cfg.lr
 IMG_SIZE = cfg.img_size
 
 
-normMean = [0.59610313, 0.45660403, 0.39085752]
-normStd = [0.25930294, 0.23150486, 0.22701606]
-
-
-transform_train = transforms.Compose([
-    transforms.Resize((IMG_SIZE, IMG_SIZE)),
-    transforms.RandomAffine(0, translate=(0.05, 0.05)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomGrayscale(),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=normMean, std=normStd)
-])
-
-transform_test = transforms.Compose([
-    transforms.Resize((IMG_SIZE, IMG_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=normMean, std=normStd)
-])
+transform_train, transform_test = get_transforms(cfg.img_size)
 
 
 def train(epoch):
@@ -119,11 +99,13 @@ for k in range(5):
         net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
     net.to(device)
     # 定义损失函数和优化方式
-    criterion = LabelSmoothSoftmaxCE()
-    optimizer = Ranger(net.parameters(), lr=LR)
+    criterion = JointLoss()
+    optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=0.001)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, last_epoch=start_epoch - 1, T_max=EPOCH, eta_min=1e-10)
 
     for i in range(start_epoch, start_epoch + EPOCH):
         train(i)
+        scheduler.step()
         valid_acc = valid(i)
         logx.save_model({'state_dict': net.state_dict(), 'epoch': i}, metric=valid_acc, epoch=i, higher_better=True, delete_old=True)
 

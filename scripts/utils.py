@@ -61,6 +61,7 @@ def get_kfold_model(path):
 
 def get_model_by_name(name='resnet50'):
     model = None
+    print("use model {}".format(name))
     if name == 'resnet50':
         model = ResNet50()
     elif name == 'facenet':

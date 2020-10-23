@@ -59,26 +59,25 @@ def get_transforms(image_size):
 
     transforms_train = albumentations.Compose([
         albumentations.HorizontalFlip(p=0.5),
-        albumentations.RandomBrightnessContrast(0.2, p=0.75),
+        albumentations.RandomBrightnessContrast(0.2, p=0.2),
         albumentations.OneOf([
             albumentations.MotionBlur(blur_limit=5),
             albumentations.MedianBlur(blur_limit=5),
             albumentations.GaussianBlur(blur_limit=5),
-            albumentations.GaussNoise(var_limit=(5.0, 30.0)),
+            albumentations.GaussNoise(var_limit=(5.0, 15.0)),
         ], p=0.5),
-        albumentations.Rotate(5),
-        albumentations.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, border_mode=0, p=0.85),
+        albumentations.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=10, border_mode=0, p=0.5),
         albumentations.Resize(image_size, image_size),
         albumentations.CoarseDropout(max_height=int(image_size * 0.15), max_width=int(image_size * 0.15), max_holes=1, p=0.7),
         albumentations.Normalize(std=normStd, mean=normMean)
     ])
 
-    transforms_val = albumentations.Compose([
+    transforms_test = albumentations.Compose([
         albumentations.Resize(image_size, image_size),
         albumentations.Normalize(std=normStd, mean=normMean)
     ])
 
-    return transforms_train, transforms_val
+    return transforms_train, transforms_test
 
 
 
