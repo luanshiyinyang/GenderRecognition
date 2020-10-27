@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import cv2
 import pandas as pd
 import albumentations
+import ttach as tta
 import numpy as np
 
 
@@ -78,6 +79,17 @@ def get_transforms(image_size):
     ])
 
     return transforms_train, transforms_test
+
+
+def get_tta_transforms():
+    tfms = tta.Compose(
+        [
+            tta.HorizontalFlip(),
+            # tta.Resize([(165, 165)]),
+            # tta.FiveCrops(160, 160)
+        ]
+    )
+    return tfms
 
 
 

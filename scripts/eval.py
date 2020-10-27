@@ -2,14 +2,13 @@ from argparse import ArgumentParser
 import os
 
 import torch
-from torchvision import transforms
 from torch.utils.data import DataLoader
 import pandas as pd
 import numpy as np
 import ttach as tta
 from tqdm import tqdm
 
-from dataset import TestDataset, get_transforms
+from dataset import TestDataset, get_transforms, get_tta_transforms
 from utils import get_model_by_name, Config
 
 parser = ArgumentParser()
@@ -33,19 +32,15 @@ net.load_state_dict(torch.load(opt.weights)['state_dict'])
 net.to("cuda")
 net.eval()
 if opt.tta == 'yes':
-    transforms = tta.Compose(
-        [
-            tta.HorizontalFlip(),
-        ]
-    )
-    net = tta.ClassificationTTAWrapper(net, transforms, merge_mode='mean')
+    net = tta.ClassificationTTAWrapper(net, get_tta_transforms(), merge_mode='mean')
 
 rst = []
 for x, _ in tqdm(test_loader):
-    x = x.cuda()
-    out = net(x)
-    _, pred = torch.max(out.data, 1)
-    rst.extend(list(pred.cpu().numpy()))
+    with torch.no_grad():
+        x = x.cuda()
+        out = net(x)
+        _, pred = torch.max(out.data, 1)
+        rst.extend(list(pred.cpu().numpy()))
 label = list(pd.read_csv(os.path.join(cfg.ds_folder, "new_valid.csv"), encoding="utf8")['label'])
 print(sum(np.array(rst) == np.array(label))/len(rst))
 

@@ -9,7 +9,7 @@ from tqdm import tqdm
 from scipy import stats
 import ttach as tta
 
-from dataset import TestDataset, get_transforms
+from dataset import TestDataset, get_transforms, get_tta_transforms
 from utils import get_kfold_model, get_model_by_name, Config
 
 parser = ArgumentParser()
@@ -28,12 +28,7 @@ for path in get_kfold_model(opt.weights):
     model = get_model_by_name(cfg.model_name)
     model.load_state_dict(torch.load(path)['state_dict'])
     if opt.tta == 'yes':
-        transforms = tta.Compose(
-            [
-                tta.HorizontalFlip()
-            ]
-        )
-        model = tta.ClassificationTTAWrapper(model, transforms, merge_mode='mean')
+        model = tta.ClassificationTTAWrapper(model, get_tta_transforms(), merge_mode='mean')
     models.append(model)
 
 rst = [[] for i in range(len(models))]
@@ -43,12 +38,13 @@ for index in range(len(models)):
     net.eval()
 
     files = []
-    for x, y in tqdm(test_loader):
-        x, filename = x.cuda(), y
-        out = net(x)
-        _, pred = torch.max(out.data, 1)
-        rst[index].extend(list(pred.cpu().numpy()))
-        files.extend(list(filename.numpy()))
+    with torch.no_grad():
+        for x, y in tqdm(test_loader):
+            x, filename = x.cuda(), y
+            out = net(x)
+            _, pred = torch.max(out.data, 1)
+            rst[index].extend(list(pred.cpu().numpy()))
+            files.extend(list(filename.numpy()))
     rst[index] = np.array(rst[index])
 
 

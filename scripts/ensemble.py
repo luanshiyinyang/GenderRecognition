@@ -13,6 +13,6 @@ for file in rsts:
 preds = np.array(preds)
 final_rst = stats.mode(np.array(preds))[0][0]
 
-submit = pd.read_csv("../dataset/test.csv", encoding="utf8")
+submit = pd.read_csv("D:\\Dataset\GR\\test.csv", encoding="utf8")
 submit['label'] = final_rst
 submit.to_csv("submit.csv", encoding="utf8", index=False)

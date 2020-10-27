@@ -60,16 +60,17 @@ def valid(epoch):
     correct = 0.0
     total = 0.0
 
-    for step, data in enumerate(valid_loader):
-        x, y = data
-        x, y = x.to(device), y.to(device)
-        out = net(x)
-        loss = criterion(out, y)
+    with torch.no_grad():
+        for step, data in enumerate(valid_loader):
+            x, y = data
+            x, y = x.to(device), y.to(device)
+            out = net(x)
+            loss = criterion(out, y)
 
-        _, pred = torch.max(out.data, 1)
-        valid_loss += loss.item()
-        total += y.size(0)
-        correct += (pred == y).squeeze().sum().cpu().numpy()
+            _, pred = torch.max(out.data, 1)
+            valid_loss += loss.item()
+            total += y.size(0)
+            correct += (pred == y).squeeze().sum().cpu().numpy()
     valid_acc = correct / total
     print("valid accuracy", valid_acc)
     logx.metric('val', {'loss': valid_loss, 'accuracy': valid_acc}, epoch=epoch)
