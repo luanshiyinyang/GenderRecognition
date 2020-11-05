@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 from runx.logx import logx
 
 from dataset import TrainDataset, get_transforms
-from optimizer import Ranger
 from utils import get_exp_num, get_model_by_name, Config
 from losses import JointLoss
 
@@ -24,6 +23,9 @@ EPOCH = cfg.epochs
 BATCH_SIZE = cfg.bs
 LR = cfg.lr
 IMG_SIZE = cfg.img_size
+# 定义是否使用GPU
+device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
+print(device)
 
 logdir = get_exp_num("../runs/")
 logx.initialize(logdir, coolname=True, tensorboard=True)
@@ -46,8 +48,7 @@ valid_data = TrainDataset(desc_valid, data_folder=os.path.join(cfg.ds_folder, 't
 train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
 valid_loader = DataLoader(dataset=valid_data, batch_size=BATCH_SIZE)
 
-# 定义是否使用GPU
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 
 net = get_model_by_name(cfg.model_name)

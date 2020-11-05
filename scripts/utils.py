@@ -1,14 +1,18 @@
 import time
 import os
 from glob import glob
+import random
 
 import numpy as np
 from PIL import Image
 import yaml
+import torch
 
 from models.resnet import ResNet50
 from models.varg_facenet import varGFaceNet
 from models.facenet import facenet
+from models.inception_resnetv2 import inceptionresnet2
+from models.wrn import wrn50
 
 
 def get_logdir(root_path):
@@ -18,11 +22,11 @@ def get_logdir(root_path):
 
 
 def get_mean_std():
-    img_h, img_w = 160, 160  # 根据自己数据集适当调整，影响不大
+    img_h, img_w = 224, 224  # 根据自己数据集适当调整，影响不大
     means, stdevs = [], []
     img_list = []
 
-    imgs_path = '../dataset/train/'
+    imgs_path = '/home/zhouchen/Datasets/GR/train/'
     imgs_path_list = os.listdir(imgs_path)
 
     len_ = len(imgs_path_list)
@@ -47,6 +51,8 @@ def get_mean_std():
 
 
 def get_exp_num(log_path):
+    if not os.path.exists(log_path):
+        os.mkdir(log_path)
     num = len(os.listdir(log_path))
     return os.path.join(log_path, "exp{}".format(num))
 
@@ -60,14 +66,16 @@ def get_kfold_model(path):
 
 
 def get_model_by_name(name='resnet50'):
-    model = None
+    model_dict = {
+        'resnet50': ResNet50(),
+        'facenet': facenet(),
+        'vargfacenet': varGFaceNet(),
+        'inception_resnet': inceptionresnet2(),
+        'wrn': wrn50()
+    }
     print("use model {}".format(name))
-    if name == 'resnet50':
-        model = ResNet50()
-    elif name == 'facenet':
-        model = facenet()
-    elif name == 'vargfacenet':
-        model = varGFaceNet()
+    if name in model_dict.keys():
+        model = model_dict[name]
     else:
         raise ValueError("no model like this")
     return model
@@ -94,6 +102,7 @@ class Config(object):
         self.img_size = training_info['img_size']
         self.epochs = training_info['epochs']
         self.model_name = training_info['model_name']
+        self.device = "cuda:{}".format(training_info['device'])
 
         # dataset info
         dataset_info = self.config['dataset']
@@ -105,6 +114,15 @@ class Config(object):
             yaml.dump(self.config, f, sort_keys=False)
 
 
+def set_seed(self, seed=2020):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = True
+    # torch.backends.cudnn.deterministic = True
+
+
 if __name__ == '__main__':
-    cfg = Config()
-    cfg.save_config("rst.yaml")
+    get_mean_std()

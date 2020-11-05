@@ -55,8 +55,11 @@ class TestDataset(Dataset):
 
 
 def get_transforms(image_size):
-    normMean = [0.59610313, 0.45660403, 0.39085752]
-    normStd = [0.25930294, 0.23150486, 0.22701606]
+    normMean_160 = [0.59610313, 0.45660403, 0.39085752]
+    normStd_160 = [0.25930294, 0.23150486, 0.22701606]
+
+    normMean_224 = [0.59610313, 0.45660552, 0.3908535]
+    normStd_224 = [0.25930434, 0.23150496, 0.22701606]
 
     transforms_train = albumentations.Compose([
         albumentations.HorizontalFlip(p=0.5),
@@ -70,12 +73,12 @@ def get_transforms(image_size):
         albumentations.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=10, border_mode=0, p=0.5),
         albumentations.Resize(image_size, image_size),
         albumentations.CoarseDropout(max_height=int(image_size * 0.15), max_width=int(image_size * 0.15), max_holes=1, p=0.7),
-        albumentations.Normalize(std=normStd, mean=normMean)
+        albumentations.Normalize(std=normStd_224, mean=normMean_224)
     ])
 
     transforms_test = albumentations.Compose([
         albumentations.Resize(image_size, image_size),
-        albumentations.Normalize(std=normStd, mean=normMean)
+        albumentations.Normalize(std=normStd_224, mean=normMean_224)
     ])
 
     return transforms_train, transforms_test

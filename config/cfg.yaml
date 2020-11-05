@@ -1,8 +1,9 @@
 training:
-  model_name: facenet
+  model_name: wrn
   lr: 0.001
-  img_size: 160
+  img_size: 224
   bs: 64
   epochs: 50
+  device: 0
 dataset:
-  root: /home/zhouchen/Projects/GenderRecognition/dataset
+  root: /home/zhouchen/Datasets/GR/

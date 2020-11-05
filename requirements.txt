@@ -3,6 +3,7 @@ pandas
 numpy
 torchvision
 opencv-python
+facenet_pytorch
 matplotlib
 runx
 ttach
@@ -11,3 +12,7 @@ tqdm
 PyYAML
 scikit-learn
 albumentations
+Pillow
+tensorboard
+tensorboardX
+torchsummary
