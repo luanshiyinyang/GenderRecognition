@@ -1,4 +1,5 @@
 import os
+
 from torch.utils.data import Dataset
 import cv2
 import pandas as pd
@@ -16,6 +17,7 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, index):
         filename, label = self.all_data[index, 0], self.all_data[index, 1]
+
         img = cv2.imread((os.path.join(self.data_folder, str(filename)+".jpg")))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         if self.transform is not None:
@@ -24,7 +26,6 @@ class TrainDataset(Dataset):
         else:
             image = img.astype(np.float32)
         image = image.transpose([2, 0, 1])
-
         return image, label
 
     def __len__(self):
@@ -72,13 +73,14 @@ def get_transforms(image_size):
         ], p=0.5),
         albumentations.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=10, border_mode=0, p=0.5),
         albumentations.Resize(image_size, image_size),
-        albumentations.CoarseDropout(max_height=int(image_size * 0.15), max_width=int(image_size * 0.15), max_holes=1, p=0.7),
-        albumentations.Normalize(std=normStd_224, mean=normMean_224)
+        albumentations.CoarseDropout(max_height=int(image_size * 0.15), max_width=int(image_size * 0.15), max_holes=6, p=0.7),
+
+        albumentations.Normalize(std=normStd_160, mean=normMean_160)
     ])
 
     transforms_test = albumentations.Compose([
         albumentations.Resize(image_size, image_size),
-        albumentations.Normalize(std=normStd_224, mean=normMean_224)
+        albumentations.Normalize(std=normStd_160, mean=normStd_160)
     ])
 
     return transforms_train, transforms_test
@@ -88,8 +90,6 @@ def get_tta_transforms():
     tfms = tta.Compose(
         [
             tta.HorizontalFlip(),
-            # tta.Resize([(165, 165)]),
-            # tta.FiveCrops(160, 160)
         ]
     )
     return tfms

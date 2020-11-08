@@ -4,13 +4,14 @@ import os
 
 import torch
 import torch.optim as optim
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from runx.logx import logx
 
 from dataset import TrainDataset, get_transforms
-from utils import get_exp_num, get_model_by_name, Config
-from losses import JointLoss
+from utils import get_exp_num, get_model_by_name, Config, set_seed
 
+set_seed()
 warnings.filterwarnings('ignore')
 parser = ArgumentParser()
 parser.add_argument("--pretrained", type=str, default=None)
@@ -26,8 +27,10 @@ IMG_SIZE = cfg.img_size
 # 定义是否使用GPU
 device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
 print(device)
-
-logdir = get_exp_num("../runs/")
+if cfg.exp_name != 'null':
+    logdir = os.path.join("../runs/", cfg.exp_name)
+else:
+    logdir = get_exp_num("../runs/")
 logx.initialize(logdir, coolname=True, tensorboard=True)
 cfg.save_config(os.path.join(logdir, 'cfg.yaml'))
 start_epoch = 0
@@ -49,17 +52,15 @@ train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=Tru
 valid_loader = DataLoader(dataset=valid_data, batch_size=BATCH_SIZE)
 
 
-
-
 net = get_model_by_name(cfg.model_name)
 if opt.pretrained:
     net.load_state_dict(torch.load(opt.pretrained)['state_dict'])
 net.to(device)
-# 定义损失函数和优化方式
-criterion = JointLoss()
+
+criterion = nn.CrossEntropyLoss()
 # optimizer = Ranger(net.parameters(), lr=LR, weight_decay=5e-4)
-optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=0.001)
-scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, last_epoch=start_epoch-1, T_max=EPOCH, eta_min=1e-10)
+optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=0.0001)
+scheduler = optim.lr_scheduler.StepLR(optimizer, last_epoch=start_epoch-1, step_size=10, gamma=0.1)
 
 
 def train(epoch):
@@ -113,8 +114,8 @@ def valid(epoch):
 
 
 for i in range(start_epoch, start_epoch + EPOCH):
-    train(i)
     scheduler.step()
+    train(i)
     valid_acc = valid(i)
     logx.save_model({'state_dict': net.state_dict(), 'last_epoch': i}, metric=valid_acc, epoch=i, higher_better=True, delete_old=True)
 

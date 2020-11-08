@@ -1,6 +1,5 @@
 from torchvision.models import wide_resnet50_2
 import torch.nn as nn
-import torch
 
 
 def wrn50():

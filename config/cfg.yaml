@@ -1,9 +1,11 @@
+exp:
+  exp_name: GR2-pretrain # null for auto name
 training:
-  model_name: wrn
-  lr: 0.001
-  img_size: 224
+  model_name: facenet
+  lr: 0.01
+  img_size: 160
   bs: 64
   epochs: 50
-  device: 0
+  device: 2
 dataset:
-  root: /home/zhouchen/Datasets/GR/
+  root: /media/zhouchen/ZC/Dataset/GR/

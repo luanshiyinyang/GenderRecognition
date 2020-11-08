@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import os
 
 import torch
 from torchvision import transforms
@@ -18,9 +19,9 @@ parser.add_argument("--tta", type=str, default='no')
 opt = parser.parse_args()
 cfg = Config()
 
-desc_test = '../dataset/test.csv'
+desc_test = os.path.join(cfg.ds_folder, 'test.csv')
 _, transform_test = get_transforms(cfg.img_size)
-valid_data = TestDataset(desc_test, data_folder="../dataset/test", transform=transform_test)
+valid_data = TestDataset(desc_test, data_folder=os.path.join(cfg.ds_folder, "test"), transform=transform_test)
 test_loader = DataLoader(dataset=valid_data, batch_size=cfg.bs, shuffle=False)
 
 models = []

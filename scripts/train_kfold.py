@@ -82,11 +82,11 @@ for k in range(5):
     start_epoch = 0
     logx.initialize(os.path.join(log_dir, 'fold_{}'.format(k)), coolname=True, tensorboard=True)
     # 数据加载
-    desc_train = '../dataset/new_train_{}.csv'.format(k)
-    desc_valid = '../dataset/new_valid_{}.csv'.format(k)
+    desc_train = os.path.join(cfg.ds_folder, 'new_train_{}.csv'.format(k))
+    desc_valid = os.path.join(cfg.ds_folder, 'new_valid_{}.csv'.format(k))
 
-    train_data = TrainDataset(desc_train, data_folder="../dataset/train/", transform=transform_train)
-    valid_data = TrainDataset(desc_valid, data_folder="../dataset/train/", transform=transform_test)
+    train_data = TrainDataset(desc_train, data_folder=os.path.join(cfg.ds_folder, "train/"), transform=transform_train)
+    valid_data = TrainDataset(desc_valid, data_folder=os.path.join(cfg.ds_folder, "train/"), transform=transform_test)
 
     # 构建DataLoader
     train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)

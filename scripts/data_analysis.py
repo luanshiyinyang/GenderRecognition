@@ -10,10 +10,10 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-from utils import Config, get_model_by_name
+from utils import Config, get_model_by_name, read_tfevents
 from dataset import get_transforms
 
-plt.style.use('fivethirtyeight')
+plt.style.use(['science', 'no-latex'])
 cfg = Config()
 
 
@@ -78,10 +78,64 @@ def plot_top_loss(k=10):
     for i in range(k):
         plt.subplot(2, 5, i + 1)
         plt.imshow(Image.open(os.path.join(folder, str(df['id'][error_img_index[i]]) + ".jpg")).convert('RGB'))
-        print("filenaame is", str(df['id'][error_img_index[i]]) + ".jpg")
+        print("filename is", str(df['id'][error_img_index[i]]) + ".jpg")
         plt.title("label {}".format(df['label'][error_img_index[i]]))
     plt.show()
 
 
+def test_augmentations(test_file='/home/zhouchen/Datasets/GR/train/1.jpg'):
+    import albumentations as A
+
+    raw_img = cv2.cvtColor(cv2.imread(test_file), cv2.COLOR_BGR2RGB)
+    tfms = {
+        'flip':  A.HorizontalFlip(p=1),
+        'bright': A.RandomBrightnessContrast(0.2, p=1),
+        'MotionBlur': A.MotionBlur(blur_limit=15, p=1),
+        'MedianBlur': A.MedianBlur(blur_limit=15, p=1),
+        'GaussianBlur': A.GaussianBlur(blur_limit=15, p=1),
+        'GaussNoise': A.GaussNoise(var_limit=(5.0, 15.0), p=1),
+        'ShiftScaleRotate': A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=10, border_mode=0, p=1),
+        'CoarseDropout': A.CoarseDropout(max_height=int(200 * 0.15), max_width=int(200 * 0.15), max_holes=5, p=1),
+        'ChannelShuffle': A.ChannelShuffle(p=1)
+    }
+
+    imgs = []
+    for k, t in tfms.items():
+        img = t(image=raw_img)['image']
+        imgs.append(img)
+    plt.figure(figsize=(15, 10))
+    plt.subplot(2, 5, 1)
+    plt.imshow(raw_img)
+    plt.title('raw')
+    for i in range(len(imgs)):
+        plt.subplot(2, 5, i+2)
+        plt.imshow(imgs[i])
+        plt.title(list(tfms.keys())[i])
+    plt.savefig('test.png', dpi=400)
+    plt.show()
+
+
+def plot_history(kind='loss'):
+    base_dir = '../runs/'
+    plot_exp = ['baseline', 'exp1', 'exp2', 'exp3', 'exp4', 'exp5', 'exp6', 'exp7', 'exp8', 'exp9', 'exp11', 'exp14', 'exp15', 'exp18']
+    plt.figure(figsize=(12, 6))
+    for exp in plot_exp:
+        train_loss, train_acc, val_loss, val_acc = read_tfevents(os.path.join(base_dir, exp))
+        plt.plot(np.arange(len(train_loss)), train_loss, label=exp)
+        # plt.plot(np.arange(len(val_loss)), val_loss, label='val_loss')
+    plt.legend(loc='best')
+    plt.title('training loss')
+    plt.show()
+
+    plt.figure(figsize=(12, 6))
+    for exp in plot_exp:
+        train_loss, train_acc, val_loss, val_acc = read_tfevents(os.path.join(base_dir, exp))
+        plt.plot(np.arange(len(val_acc)), val_acc, label=exp)
+        # plt.plot(np.arange(len(val_loss)), val_loss, label='val_loss')
+    plt.legend(loc='best')
+    plt.title('validation accuracy')
+    plt.show()
+
+
 if __name__ == '__main__':
-    plot_top_loss()
+    plot_history()
