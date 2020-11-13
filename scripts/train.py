@@ -27,7 +27,7 @@ IMG_SIZE = cfg.img_size
 # 定义是否使用GPU
 device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
 print(device)
-if cfg.exp_name != 'null':
+if cfg.exp_name != 'None':
     logdir = os.path.join("../runs/", cfg.exp_name)
 else:
     logdir = get_exp_num("../runs/")
